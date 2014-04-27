@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>KMP算法分享</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="xautjzd">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+		<style rel="stylesheet">
+			.left-align { text-align: left;}
+		</style>
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-markdown>
+					<script type="text/template">
+						# KMP算法介绍
+						@xautjzd
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## KMP算法作用
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						KMP算法主要用于字符串的查找，属于经典的字符串匹配算法。
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## KMP算法命名
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						KMP是Knuth-Morris-Pratt的简称，以三个发明者命名。
+						</br>
+						### Knuth荣誉:  
+						- 1974年图灵奖得主
+
+						### Knuth贡献：  
+						- 《The Art of Computer Programming》  
+						- 发明Tex(派生Latex/MiKTex)  
+						- 发明KMP算法
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## KMP算法实例
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						### 思考:
+						现有一个字符串"BBC ABCDAB ABCDABCDABDE"，如何快速有效判断其中是否包含另一个字符串"ABCDABD"？
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/1.png)
+
+						首先，将字符串"BBC ABCDAB ABCDABCDABDE"与搜索词"ABCDABD"的第一个字符进行比较，B与A不匹配，搜索词右移一位
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/2.png)
+
+						B与A还不匹配，继续右移一位
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/3.png)
+
+						就这样，直到字符串中有一个字符与搜索词第一个字符匹配
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/4.png)
+
+						接着比较字符串与搜索词的下一个字符
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/5.png)
+
+						直到字符串中有一个字符与搜索词对应字符不匹配
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/6.png)
+
+						这时，最常见的做法是将搜索词向右移一位，再从头开始比较。虽然可行，但是效率较低，因为要将搜索位置移到已经比较过的位置，重新比较。
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/7.png)
+
+						事实上，空格与D不匹配时，其实已经知道前六个字符是"ABCDAB", KMP算法就是利用这些已知的信息，不要将搜索位置移回到已比较过的位置，而是只能后移，这样效率就提高了。
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/8.png)
+
+						要做到这点，就需要针对搜索词，求出一张《部分匹配表》(Partial Match Table)，利用部分匹配表来实现搜索位置不回移。
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						### 部分匹配表
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/9.png)
+
+						要了解部分匹配表，需要先了解**前缀**与**后缀**。如上图所示，**前缀**即是除去最后一个字符外的全部头部组合，而**后缀**是除去第一个字符外的全部尾部组合
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/8.png)
+
+						部分匹配值就是字符串前缀与后缀最长公共部分长度，所以有：
+
+						- "A"的前缀和后缀都为空集，共有元素的长度为0
+						- "AB"的前缀为[A]，后缀为[B]，共有元素的长度为0
+						- "ABC"的前缀为[A, AB]，后缀为[BC, C]，共有元素的长度0
+						- ...
+						- "ABCDABD"的前缀为[A, AB, ABC, ABCD, ABCDA, ABCDAB]，后缀为[BCDABD, CDABD, DABD, ABD, BD, D]，共有元素的长度为0
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/10.png)
+
+						部分匹配实质是搜索子串头部与尾部的重复字符数。eg:搜索子串`ABCDAB`中头尾有两个AB重复，那么它的部分匹配值就是2。
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/11.png)
+
+						如图所示，空格与D不匹配，但前面的6个字符"ABCDAB"是匹配的，根据部分匹配表可知，最后一个匹配字符B对应的部分匹配值为2，搜索串向右移动的为数可通过：
+						> 移动位数 = 已匹配的字符数 - 对应的部分匹配值
+
+						那么搜索串则向右移动6-2=4位。
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/12.png)
+
+						空格与C不匹配，搜索词继续右移。已匹配的字符为"AB",对应的部分匹配值为0，则向右移动2-0=2位。
+					</script>
+				</section>
+				<section class="left-align" data-markdown>
+					<script type="text/template">
+						![](images/13.png)
+
+						空格与A不匹配，同时也到达搜索串的最左边，右移一位继续。最终结果如下图：
+
+						![](images/14.png)
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+					# The End
+					</script>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
